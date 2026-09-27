@@ -7,5 +7,7 @@
 - Dissatisfaction: standardized score 1–2
 - Source of truth: Master Google Sheet
 - Hosting: Netlify
+- Continuous deployment: GitHub main → Netlify
+- Dashboard API: /api/dashboard
 
-> Phase 1 dashboard shell. Live Google Sheets sync and secure admin authentication are implemented in subsequent phases.
+> Phase 2: Dashboard API and safe fallback are deployed. Direct Google Sheets runtime sync and secure admin authentication are the next steps.
