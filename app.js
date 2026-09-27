@@ -1,1 +1,31 @@
-const data={ALL:{sat:93.56,diss:1.70,respondents:610,scores:9138},U01:{sat:96.51,diss:1.75,respondents:42,scores:630},U02:null,U03:null,U04:{sat:98.34,diss:.11,respondents:62,scores:930},U05:{sat:91.75,diss:2.40,respondents:162,scores:2418},U06:{sat:93.19,diss:1.65,respondents:344,scores:5160}};const names={U01:"ไตเทียม",U02:"วิสัญญี",U03:"งานห้องผ่าตัด",U04:"ศูนย์ส่องกล้องโรคระบบทางเดินอาหาร",U05:"ห้องคลอด",U06:"ห้องส่องกล้องระบบทางเดินหายใจ"};function fmt(x){return x==null?"ไม่มีข้อมูล":x.toFixed(2)+"%"}function render(){const u=document.querySelector("#unit").value,d=data[u];document.querySelector("#sat").textContent=d?fmt(d.sat):"ไม่มีข้อมูล";document.querySelector("#diss").textContent=d?fmt(d.diss):"ไม่มีข้อมูล";document.querySelector("#respondents").textContent=d?d.respondents.toLocaleString("th-TH"):"—";document.querySelector("#scores").textContent=d?d.scores.toLocaleString("th-TH"):"—";const s=document.querySelector("#status");s.textContent=d?(d.sat>80?"ผ่านเกณฑ์ >80%":"ไม่ผ่านเกณฑ์"):"ไม่มีข้อมูล";s.className=d&&d.sat>80?"pass":"fail";const rows=Object.keys(names).map(k=>{const x=data[k];return '<div class="barrow"><b>'+names[k]+'</b><div class="track"><div class="fill" style="width:'+(x?Math.min(100,x.sat):0)+'%"></div></div><strong>'+(x?fmt(x.sat):"—")+'</strong></div>'}).join("");document.querySelector("#bars").innerHTML=rows}document.querySelector("#apply").onclick=render;document.querySelector("#clear").onclick=()=>{document.querySelector("#unit").value="ALL";document.querySelector("#fy").value="ALL";document.querySelector("#from").value="";document.querySelector("#to").value="";render()};render();
+const fallback={ALL:{sat:93.56,diss:1.70,respondents:610,scores:9138,dq:27},U01:{sat:96.51,diss:1.75,respondents:42,scores:630,dq:0},U02:null,U03:null,U04:{sat:98.34,diss:.11,respondents:62,scores:930,dq:0},U05:{sat:91.75,diss:2.40,respondents:162,scores:2418,dq:27},U06:{sat:93.19,diss:1.65,respondents:344,scores:5160,dq:0}};
+const names={U01:"ไตเทียม",U02:"วิสัญญี",U03:"งานห้องผ่าตัด",U04:"ศูนย์ส่องกล้องโรคระบบทางเดินอาหาร",U05:"ห้องคลอด",U06:"ห้องส่องกล้องระบบทางเดินหายใจ"};
+let live=null;
+function fmt(x){return x==null?"ไม่มีข้อมูล":Number(x).toFixed(2)+"%"}
+function setStatus(message,isLive=false){const el=document.querySelector(".live");if(el){el.textContent=(isLive?"● ":"○ ")+message;el.title=isLive?"ข้อมูลจากระบบ Live":"กำลังใช้ข้อมูลสำรองล่าสุด"}}
+function currentData(){return live?.summary||fallback}
+function render(){
+ const unit=document.querySelector("#unit").value,fy=document.querySelector("#fy").value;
+ const dataset=currentData();
+ let d=dataset[unit];
+ if(live&&fy!=="ALL"){d=live.byFY?.[unit]?.[fy]||null}
+ document.querySelector("#sat").textContent=d?fmt(d.sat):"ไม่มีข้อมูล";
+ document.querySelector("#diss").textContent=d?fmt(d.diss):"ไม่มีข้อมูล";
+ document.querySelector("#respondents").textContent=d&&d.respondents!=null?Number(d.respondents).toLocaleString("th-TH"):"—";
+ document.querySelector("#scores").textContent=d&&d.scores!=null?Number(d.scores).toLocaleString("th-TH"):"—";
+ const s=document.querySelector("#status");s.textContent=d?(Number(d.sat)>80?"ผ่านเกณฑ์ >80%":"ไม่ผ่านเกณฑ์"):"ไม่มีข้อมูล";s.className=d&&Number(d.sat)>80?"pass":"fail";
+ document.querySelector("#bars").innerHTML=Object.keys(names).map(k=>{let x=dataset[k];if(live&&fy!=="ALL")x=live.byFY?.[k]?.[fy]||null;return '<div class="barrow"><b>'+names[k]+'</b><div class="track"><div class="fill" style="width:'+(x?Math.min(100,Number(x.sat)):0)+'%"></div></div><strong>'+(x?fmt(x.sat):"—")+'</strong></div>'}).join("");
+}
+async function loadLive(){
+ setStatus("กำลังตรวจสอบข้อมูลล่าสุด…");
+ try{
+  const r=await fetch("/api/dashboard",{headers:{"Accept":"application/json"},cache:"no-store"});
+  if(!r.ok)throw new Error("API "+r.status);
+  const j=await r.json();
+  if(!j||!j.summary)throw new Error("รูปแบบข้อมูลไม่ถูกต้อง");
+  live=j;setStatus("ข้อมูล Dashboard ล่าสุด",true);render();
+ }catch(e){console.warn("Live data unavailable; using verified fallback.",e);setStatus("ข้อมูลสำรองล่าสุด • รอเปิด Live Data");render()}
+}
+document.querySelector("#apply").onclick=render;
+document.querySelector("#clear").onclick=()=>{document.querySelector("#unit").value="ALL";document.querySelector("#fy").value="ALL";document.querySelector("#from").value="";document.querySelector("#to").value="";render()};
+render();loadLive();
