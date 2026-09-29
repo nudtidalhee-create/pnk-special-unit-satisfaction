@@ -4,6 +4,7 @@ let live=null;let publicComments=null;
 function fmt(x){return x==null?"ไม่มีข้อมูล":Number(x).toFixed(2)+"%"}
 function setStatus(message,isLive=false){const el=document.querySelector(".live");if(el){el.textContent=(isLive?"● ":"○ ")+message;el.title=isLive?"ข้อมูลจากระบบ Live":"กำลังใช้ข้อมูลสำรองล่าสุด"}}
 function currentData(){return live?.summary||fallback}
+function renderActionStatus(unit){const el=document.querySelector("#action-status");if(!el)return;const units=unit==="ALL"?Object.keys(names):[unit];el.innerHTML=units.map(u=>{const noData=u==="U02"||u==="U03";return "<div class=\"action-row\"><b>"+names[u]+"</b><span class=\"status-pill\">"+(noData?"รอข้อมูลผลประเมิน":"รอทบทวน Action Plan")+"</span></div>"}).join("")}
 function renderComments(unit){const dev=document.querySelector("#development-comments"),praise=document.querySelector("#praise-comments");if(!dev||!praise)return;const units=unit==="ALL"?Object.keys(names):[unit];const collect=k=>units.flatMap(u=>publicComments?.units?.[u]?.[k]||[]);const show=(el,arr)=>{el.innerHTML=arr.length?arr.slice(0,12).map(t=>"<div class=\"comment-item\">“"+t+"”</div>").join(""):"<div class=\"empty\">ไม่มีข้อมูลที่ผ่านการอนุมัติสำหรับเผยแพร่</div>"};show(dev,collect("development"));show(praise,collect("praise"))}
 function render(){
  const unit=document.querySelector("#unit").value,fy=document.querySelector("#fy").value;
@@ -15,7 +16,7 @@ function render(){
  document.querySelector("#respondents").textContent=d&&d.respondents!=null?Number(d.respondents).toLocaleString("th-TH"):"—";
  document.querySelector("#scores").textContent=d&&d.scores!=null?Number(d.scores).toLocaleString("th-TH"):"—";
  const s=document.querySelector("#status");s.textContent=d?(Number(d.sat)>80?"ผ่านเกณฑ์ >80%":"ไม่ผ่านเกณฑ์"):"ไม่มีข้อมูล";s.className=d&&Number(d.sat)>80?"pass":"fail";
- renderComments(unit);
+ renderComments(unit);renderActionStatus(unit);
  document.querySelector("#bars").innerHTML=Object.keys(names).map(k=>{let x=dataset[k];if(live&&fy!=="ALL")x=live.byFY?.[k]?.[fy]||null;return '<div class="barrow"><b>'+names[k]+'</b><div class="track"><div class="fill" style="width:'+(x?Math.min(100,Number(x.sat)):0)+'%"></div></div><strong>'+(x?fmt(x.sat):"—")+'</strong></div>'}).join("");
 }
 async function loadLive(){
