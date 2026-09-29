@@ -1,0 +1,44 @@
+name: Sync Public KPI Daily
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 18 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download public aggregate CSV
+        env:
+          SHEET_ID: 1gMI6ISuWPI2O9Ffq70T9arG1N4YkFz6wlOd0mEonP-o
+          GID: "1114416505"
+        run: |
+          python - <<'PY'
+          import csv, json, os, urllib.request
+          sid=os.environ["SHEET_ID"]; gid=os.environ["GID"]
+          url=f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
+          data=urllib.request.urlopen(url, timeout=30).read().decode("utf-8-sig")
+          rows=[]
+          for r in csv.DictReader(data.splitlines()):
+              if not r.get("service_date") or not r.get("unit_id"): continue
+              rows.append({
+                "d":r["service_date"],"fy":r["fiscal_year"],"u":r["unit_id"],
+                "r":int(float(r["respondents"] or 0)),"n":int(float(r["valid_scores"] or 0)),
+                "s":int(float(r["satisfied_scores"] or 0)),"x":int(float(r["dissatisfied_scores"] or 0))
+              })
+          os.makedirs("data",exist_ok=True)
+          with open("data/daily-kpi.json","w",encoding="utf-8") as f:
+              json.dump({"rows":rows},f,ensure_ascii=False,separators=(",",":"))
+          print("public rows",len(rows))
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/daily-kpi.json
+          git diff --cached --quiet || (git commit -m "Auto-sync public daily KPI" && git push)
