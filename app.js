@@ -19,7 +19,7 @@ function render(){
 async function loadLive(){
  setStatus("กำลังตรวจสอบข้อมูลล่าสุด…");
  try{
-  const r=await fetch("/api/dashboard",{headers:{"Accept":"application/json"},cache:"no-store"});
+  const r=await fetch("./data/dashboard.json",{headers:{"Accept":"application/json"},cache:"no-store"});
   if(!r.ok)throw new Error("API "+r.status);
   const j=await r.json();
   if(!j||!j.summary)throw new Error("รูปแบบข้อมูลไม่ถูกต้อง");
