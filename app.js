@@ -1,4 +1,4 @@
-const fallback={ALL:{sat:93.56,diss:1.70,respondents:610,scores:9138,dq:27},U01:{sat:96.51,diss:1.75,respondents:42,scores:630,dq:0},U02:null,U03:null,U04:{sat:98.34,diss:.11,respondents:62,scores:930,dq:0},U05:{sat:91.75,diss:2.40,respondents:162,scores:2418,dq:27},U06:{sat:93.19,diss:1.65,respondents:344,scores:5160,dq:0}};
+const fallback={ALL:{sat:93.61,diss:1.68,respondents:616,scores:9213,dq:27},U01:{sat:96.59,diss:1.71,respondents:43,scores:645,dq:0},U02:null,U03:null,U04:{sat:98.34,diss:.11,respondents:62,scores:930,dq:0},U05:{sat:91.75,diss:2.40,respondents:163,scores:2418,dq:27},U06:{sat:93.26,diss:1.63,respondents:348,scores:5220,dq:0}};
 const names={U01:"ไตเทียม",U02:"วิสัญญี",U03:"งานห้องผ่าตัด",U04:"ศูนย์ส่องกล้องโรคระบบทางเดินอาหาร",U05:"ห้องคลอด",U06:"ห้องส่องกล้องระบบทางเดินหายใจ"};
 let live=null;
 function fmt(x){return x==null?"ไม่มีข้อมูล":Number(x).toFixed(2)+"%"}
