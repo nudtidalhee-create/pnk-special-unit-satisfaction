@@ -3,7 +3,7 @@ name: Sync Public KPI Daily
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 18 * * *"
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
