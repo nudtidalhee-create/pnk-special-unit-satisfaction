@@ -15,8 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download public aggregate CSV
         env:
-          SHEET_ID: 1gMI6ISuWPI2O9Ffq70T9arG1N4YkFz6wlOd0mEonP-o
-          GID: "1114416505"
+          SHEET_ID: 1-lXGos3549uqEvlHPJtOFxGvnh1rxUlWQj1z_V-WstI
+          GID: "1269007488"
         run: |
           python - <<'PY'
           import csv, json, os, urllib.request
