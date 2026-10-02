@@ -11,6 +11,7 @@ function renderTrend(unit,fy,from,to){const el=document.querySelector("#trend-ch
 function syncFiscalYearOptions(){const sel=document.querySelector("#fy");if(!sel||!dailyRows.length)return;const current=sel.value;const fys=[...new Set(dailyRows.map(z=>String(z.fy)).filter(Boolean))].sort((a,b)=>Number(b)-Number(a));sel.innerHTML='<option value="ALL">ทุกปีงบประมาณ</option>'+fys.map(fy=>'<option value="'+fy+'">'+fy+'</option>').join('');sel.value=(current==="ALL"||fys.includes(current))?current:"ALL"}
 function filteredDaily(unit,fy,from,to){return dailyRows.filter(z=>(unit==="ALL"||z.u===unit)&&(fy==="ALL"||String(z.fy)===fy)&&(!from||z.d>=from)&&(!to||z.d<=to))}
 function aggregateDaily(rows){if(!rows.length)return null;const n=rows.reduce((a,z)=>a+Number(z.n||0),0),sat=rows.reduce((a,z)=>a+Number(z.s||0),0),dis=rows.reduce((a,z)=>a+Number(z.x||0),0),resp=rows.reduce((a,z)=>a+Number(z.r||0),0);return {sat:n?sat/n*100:null,diss:n?dis/n*100:null,respondents:resp,scores:n,dq:0}}
+function renderDQ(unit,fy,from,to){const value=document.querySelector("#dq-value"),note=document.querySelector("#dq-note");if(!value||!note)return;const filtered=(fy!=="ALL"||from||to);if(filtered){value.textContent="—";note.textContent="Data Quality Review ยังไม่ได้แยกรายช่วงเวลาที่เลือก จึงไม่แสดงค่า 27 ของภาพรวมเพื่อป้องกันความเข้าใจผิด";return}const d=currentData()?.[unit];const dq=d&&d.dq!=null?Number(d.dq):null;value.textContent=dq==null?"—":dq.toLocaleString("th-TH");note.textContent=unit==="ALL"?"รายการภาพรวมที่ถูกแยกออกจากการคำนวณจนกว่าจะตรวจสอบ":"รายการของหน่วยงานที่ถูกแยกออกจากการคำนวณจนกว่าจะตรวจสอบ"}
 function render(){
  const unit=document.querySelector("#unit").value,fy=document.querySelector("#fy").value,from=document.querySelector("#from").value,to=document.querySelector("#to").value;
  const dataset=currentData();
@@ -22,7 +23,7 @@ function render(){
  document.querySelector("#respondents").textContent=d&&d.respondents!=null?Number(d.respondents).toLocaleString("th-TH"):"—";
  document.querySelector("#scores").textContent=d&&d.scores!=null?Number(d.scores).toLocaleString("th-TH"):"—";
  const s=document.querySelector("#status");s.textContent=d?(Number(d.sat)>80?"ผ่านเกณฑ์ >80%":"ไม่ผ่านเกณฑ์"):"ไม่มีข้อมูล";s.className=d&&Number(d.sat)>80?"pass":"fail";
- renderComments(unit);renderActionStatus(unit);renderTrend(unit,fy,from,to);
+ renderComments(unit);renderActionStatus(unit);renderTrend(unit,fy,from,to);renderDQ(unit,fy,from,to);
  document.querySelector("#bars").innerHTML=Object.keys(names).map(k=>{let x=useDaily?aggregateDaily(filteredDaily(k,fy,from,to)):dataset[k];if(!useDaily&&live&&fy!=="ALL")x=live.byFY?.[k]?.[fy]||null;return '<div class="barrow"><b>'+names[k]+'</b><div class="track"><div class="fill" style="width:'+(x?Math.min(100,Number(x.sat)):0)+'%"></div></div><strong>'+(x?fmt(x.sat):"—")+'</strong></div>'}).join("");
 }
 async function loadLive(){
