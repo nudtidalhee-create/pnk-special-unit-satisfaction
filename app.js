@@ -15,7 +15,7 @@ function renderDQ(unit,fy,from,to){const value=document.querySelector("#dq-value
 function render(){
  const unit=document.querySelector("#unit").value,fy=document.querySelector("#fy").value,from=document.querySelector("#from").value,to=document.querySelector("#to").value;
  const dataset=currentData();
- const useDaily=dailyRows.length>0&&(fy!=="ALL"||from||to);
+ const useDaily=dailyRows.length>0;
  let d=useDaily?aggregateDaily(filteredDaily(unit,fy,from,to)):dataset[unit];
  if(!useDaily&&live&&fy!=="ALL"){d=live.byFY?.[unit]?.[fy]||null}
  document.querySelector("#sat").textContent=d?fmt(d.sat):"ไม่มีข้อมูล";
